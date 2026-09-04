@@ -41,14 +41,22 @@ if question:
     # get AI respoense
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            response = client.models.generate_content(
-                model="gemini-3.6-flash",
-                contents=question)
-            answer= response.text
-        st.markdown(answer)
-
-    # save AI response
-    st.session_state.messages.append({
-        "role":"assistant",
-        "content":answer
-    })
+            chat_history = []
+            for message in st.session_state.messages:
+                chat_history.append({
+                    "role":message["role"],
+                    "parts":[{"text":message["content"]}]
+                })
+            try:
+                response = client.models.generate_content(
+                    model="gemini-3.6-flash",
+                    contents=chat_history)
+                answer= response.text
+                st.markdown(answer)
+                
+                # save AI response
+                st.session_state.messages.append({
+                    "role":"assistant",
+                    "content":answer})
+            except Exception as e:
+                 st.error("Something went wrong. Please try again later.")
