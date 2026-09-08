@@ -7,7 +7,10 @@ from google import genai
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 # Gemini client
-client = genai.Client(api_key=api_key)
+@st.cache_resource
+def get_client():
+    return genai.Client(api_key=api_key)
+client = get_client()
 
 # -------------------------
 # Session State
@@ -20,6 +23,25 @@ if "messages" not in st.session_state:
 # -------------------------
 st.title("AI Chatbot")
 st.write("Ask me anything!")
+
+# Side bar
+with st.sidebar:
+    st.title("Settings")
+
+    if st.button(" New Chat"):
+        st.session_state.messages = []
+        st.rerun()
+
+    st.divider()
+    st.subheader(" Previous Chats")
+    st.write("No previous chats yet.")
+    st.divider()
+    st.subheader(" Account")
+
+    if st.button(" Sign In"):
+        st.info("Login feature coming soon!")
+
+
 
 # show previous messages
 for message in st.session_state.messages:
@@ -59,4 +81,10 @@ if question:
                     "role":"assistant",
                     "content":answer})
             except Exception as e:
-                 st.error("Something went wrong. Please try again later.")
+                error_message = str(e)
+                if "429" in error_message:
+                    st.error("API quota exceeded. Please try again later.")
+                elif "503" in error_message:
+                    st.error("Gemini is temporarily unavailable. Please try again.")
+                else:
+                    st.error("Something went wrong.")
