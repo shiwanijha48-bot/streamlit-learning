@@ -3,6 +3,8 @@ import os
 from dotenv import load_dotenv
 from google import genai
 
+from auth import create_user
+
 # Load API key
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
@@ -17,6 +19,42 @@ client = get_client()
 # -------------------------
 if "messages" not in st.session_state:
     st.session_state.messages = []
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+
+    st.title("Create Account")
+
+    name = st.text_input("Name")
+    email = st.text_input("Email")
+    password = st.text_input("Password", type="password")
+    confirm_password = st.text_input("Confirm Password", type="password")
+
+    if st.button("Sign Up"):
+
+        if not name or not email or not password or not confirm_password:
+            st.warning("Please fill all fields.")
+
+        elif password != confirm_password:
+            st.error("Passwords do not match.")
+
+        else:
+            try:
+                create_user(name, email, password)
+
+                st.success("Account created successfully! 🎉")
+                st.info("You can now login.")
+
+            except Exception as e:
+                if "Duplicate entry" in str(e):
+                    st.error("An account with this email already exists.")
+                else:
+                    st.error("Something went wrong.")
+                    print(e)
+
+    st.stop()
 
 # -------------------------
 # UI
