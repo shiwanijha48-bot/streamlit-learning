@@ -3,7 +3,6 @@ import os
 from dotenv import load_dotenv
 from google import genai
 
-
 from auth import create_user
 
 # Load API key
@@ -60,6 +59,7 @@ if not st.session_state.logged_in:
 # -------------------------
 # UI
 # -------------------------
+
 st.title("AI Chatbot")
 st.write("Ask me anything!")
 
